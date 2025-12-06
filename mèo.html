@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cat Adoption Matcher</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0d0d0f url('https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=1920') no-repeat center/cover;
+      background-attachment: fixed;
+      color: #f2f2f2;
+    }
+    .overlay {
+      backdrop-filter: blur(5px);
+      background: rgba(0,0,0,0.6);
+      min-height: 100vh;
+      padding: 40px;
+    }
+    .logo {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 80px;
+      height: 80px;
+      z-index: 1000;
+      background: rgba(255,140,50,0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      transition: transform 0.3s;
+    }
+    .logo:hover {
+      transform: scale(1.1);
+    }
+    .logo img {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+    }
+    h1 {
+      text-align: center;
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+    .main-layout {
+      display: flex;
+      gap: 30px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .left-section {
+      flex: 2;
+      width: 66.66%;
+    }
+    .right-section {
+      flex: 1;
+      width: 33.33%;
+    }
+    .container {
+      background: rgba(20,20,20,0.8);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    .grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    select, label {
+      font-size: 1.05rem;
+    }
+    select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: #1b1b1d;
+      color: #fff;
+      margin-top: 8px;
+    }
+    button {
+      width: 100%;
+      margin-top: 30px;
+      padding: 15px;
+      background: #ff8c32;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #ffae5d;
+    }
+    .result {
+      margin-top: 40px;
+      text-align: center;
+      display: none;
+      animation: fadeIn 0.7s both;
+    }
+    .result img {
+      width: 280px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      object-fit: cover;
+      background: #222;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    .breeds-section {
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 2px solid rgba(255,255,255,0.1);
+    }
+    .breeds-section h2 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 40px;
+      color: #ff8c32;
+    }
+    .breeds-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 30px;
+    }
+    .breed-card {
+      background: rgba(30,30,30,0.9);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .breed-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(255,140,50,0.3);
+    }
+    .breed-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .breed-card h3 {
+      color: #ff8c32;
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+    }
+    .breed-card p {
+      line-height: 1.6;
+      color: #e0e0e0;
+    }
+    .products-section {
+      background: rgba(20,20,20,0.8);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      position: sticky;
+      top: 40px;
+      max-height: calc(100vh - 80px);
+      overflow-y: auto;
+    }
+    .products-section h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 30px;
+      color: #ff8c32;
+    }
+    .product-item {
+      background: rgba(30,30,30,0.9);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .product-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(255,140,50,0.3);
+    }
+    .product-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .product-info {
+      flex: 1;
+    }
+    .product-info h3 {
+      color: #ff8c32;
+      margin: 0 0 8px 0;
+      font-size: 1.1rem;
+    }
+    .product-info p {
+      color: #e0e0e0;
+      margin: 0 0 5px 0;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .product-price {
+      color: #4ade80;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    @media (max-width: 1200px) {
+      .main-layout {
+        flex-direction: column;
+      }
+      .left-section, .right-section {
+        width: 100%;
+      }
+      .products-section {
+        position: relative;
+        max-height: none;
+      }
+    }
+    .footer {
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 2px solid rgba(255,255,255,0.1);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      max-width: 1600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .footer-box {
+      background: rgba(20,20,20,0.8);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    .footer-box h3 {
+      color: #ff8c32;
+      font-size: 1.8rem;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    .footer-box p {
+      color: #e0e0e0;
+      line-height: 1.6;
+      margin: 10px 0;
+    }
+    .footer-box a {
+      display: inline-block;
+      padding: 12px 25px;
+      background: #ff8c32;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      transition: 0.2s;
+      margin-top: 15px;
+    }
+    .footer-box a:hover {
+      background: #ffae5d;
+      transform: scale(1.05);
+    }
+    .contact-info {
+      font-size: 1.2rem;
+      color: #fff;
+    }
+    @media (max-width: 768px) {
+      .footer {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="logo">
+  <img src="https://cdn-icons-png.flaticon.com/512/616/616430.png" alt="Logo Cat Adoption" />
+</div>
+<div class="overlay">
+  <h1>Tìm Giống Mèo Phù Hợp</h1>
+  <div class="main-layout">
+    <div class="left-section">
+      <div class="container">
+    <form id="catForm" autocomplete="off" onsubmit="event.preventDefault(); findMatch();">
+      <div class="grid">
+        <div>
+          <label for="personality">Tính cách:</label>
+          <select id="personality">
+            <option value="friendly">Thân thiện</option>
+            <option value="calm">Trầm tính</option>
+            <option value="active">Hiếu động</option>
+            <option value="independent">Độc lập</option>
+            <option value="playful">Vui tươi</option>
+          </select>
+        </div>
+        <div>
+          <label for="fur">Độ dài lông:</label>
+          <select id="fur">
+            <option value="short">Ngắn</option>
+            <option value="medium">Trung bình</option>
+            <option value="long">Dài</option>
+          </select>
+        </div>
+        <div>
+          <label for="size">Kích thước:</label>
+          <select id="size">
+            <option value="small">Nhỏ</option>
+            <option value="medium">Trung bình</option>
+            <option value="large">Lớn</option>
+          </select>
+        </div>
+        <div>
+          <label for="care">Mức độ chăm sóc:</label>
+          <select id="care">
+            <option value="low">Thấp</option>
+            <option value="medium">Vừa</option>
+            <option value="high">Cao</option>
+          </select>
+        </div>
+        <div>
+          <label for="energy">Mức năng lượng:</label>
+          <select id="energy">
+            <option value="low">Thấp</option>
+            <option value="medium">Trung bình</option>
+            <option value="high">Cao</option>
+          </select>
+        </div>
+        <div>
+          <label for="social">Mức độ hòa đồng:</label>
+          <select id="social">
+            <option value="low">Ít</option>
+            <option value="medium">Vừa</option>
+            <option value="high">Nhiều</option>
+          </select>
+        </div>
+        <div>
+          <label for="grooming">Tần suất chải lông:</label>
+          <select id="grooming">
+            <option value="minimal">Tối thiểu</option>
+            <option value="weekly">Hàng tuần</option>
+            <option value="daily">Hàng ngày</option>
+          </select>
+        </div>
+        <div>
+          <label for="vocal">Mức độ kêu:</label>
+          <select id="vocal">
+            <option value="quiet">Ít kêu</option>
+            <option value="moderate">Vừa phải</option>
+            <option value="vocal">Nhiều</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit">Tìm kiếm</button>
+    </form>
+
+    <div class="result" id="result">
+      <img id="catImg" src="" alt="Ảnh mèo phù hợp" style="display:none;" />
+      <h2 id="catName"></h2>
+      <p id="catDesc"></p>
+    </div>
+
+    <div class="breeds-section">
+      <h2>Khám Phá Các Giống Mèo</h2>
+      <div class="breeds-grid" id="breedsGrid"></div>
+    </div>
+      </div>
+    </div>
+    
+    <div class="right-section">
+      <div class="products-section">
+        <h2>Gợi Ý Mua Sắm</h2>
+        <div id="productsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-box">
+      <h3>📞 Thông Tin Liên Hệ</h3>
+      <p class="contact-info">Hotline: <strong>0901 234 567</strong></p>
+      <p class="contact-info">Email: <strong>info@catadoption.vn</strong></p>
+      <p class="contact-info">Địa chỉ: <strong>Số 1 Hoàng Minh Giám, Quận Thanh Xuân, Hà Nội</strong></p>
+      <p style="color: #b0b0b0; font-size: 0.9rem; margin-top: 15px;">Giờ làm việc: 8:00 - 20:00 (Tất cả các ngày trong tuần)</p>
+    </div>
+    
+    <div class="footer-box">
+      <h3><span style="color: #ffd700;">ℹ️</span> Về Chúng Tôi</h3>
+      <p>Chúng tôi là một nhóm học sinh đam mê mang những giống mèo độc đáo đến với những người yêu mèo tại Việt Nam.</p>
+      <a href="ve-chung-toi.html">Tìm hiểu thêm →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const cats = [
+    {
+      name: "Mèo Anh Lông Ngắn",
+      personality: "calm",
+      fur: "short",
+      size: "medium",
+      care: "low",
+      energy: "low",
+      social: "medium",
+      grooming: "minimal",
+      vocal: "quiet",
+      img: "https://file.hstatic.net/200000159621/article/3.9__5__278779a3db4c4ef380cd59d09905c760_grande.jpg",
+      desc: "Mèo Anh lông ngắn hiền lành, dễ nuôi và ít đòi hỏi chăm sóc. Chúng có tính cách điềm đạm, thích nằm yên và rất phù hợp với những người sống trong căn hộ nhỏ."
+    },
+    {
+      name: "Mèo Ba Tư",
+      personality: "calm",
+      fur: "long",
+      size: "medium",
+      care: "high",
+      energy: "low",
+      social: "medium",
+      grooming: "daily",
+      vocal: "quiet",
+      img: "https://petcorner.vn/wp-content/uploads/2025/05/Meo-Ba-Tu-giong-meo-duoc-nhieu-nguoi-nuoi-yeu-thich-1.png",
+      desc: "Mèo Ba Tư sở hữu bộ lông dài mềm mịn và tính cách nhẹ nhàng, phù hợp với người thích chải lông. Chúng rất yên tĩnh và thích được vuốt ve, là bạn đồng hành lý tưởng cho những người thích sự bình yên."
+    },
+    {
+      name: "Mèo Bengal",
+      personality: "active",
+      fur: "short",
+      size: "large",
+      care: "medium",
+      energy: "high",
+      social: "high",
+      grooming: "weekly",
+      vocal: "moderate",
+      img: "https://cdn.mos.cms.futurecdn.net/Uwu9iN5UXkusxNwr2Dixuh-970-80.jpg.webp",
+      desc: "Mèo Bengal năng động, thông minh và thích vui chơi, phù hợp người thích sự tương tác. Chúng có vẻ ngoài giống báo hoa mai và cần không gian để chạy nhảy, rất phù hợp với những gia đình có sân vườn."
+    },
+    {
+      name: "Mèo Ragdoll",
+      personality: "friendly",
+      fur: "long",
+      size: "large",
+      care: "medium",
+      energy: "low",
+      social: "high",
+      grooming: "weekly",
+      vocal: "quiet",
+      img: "https://cfa.org/wp-content/uploads/2024/06/RDportrait.jpg",
+      desc: "Ragdoll nổi tiếng hiền hòa, quấn chủ và dễ hòa hợp với gia đình. Khi được bế, chúng thường thả lỏng cơ thể như một con búp bê vải, rất thích hợp cho những gia đình có trẻ em."
+    },
+    {
+      name: "Mèo Maine Coon",
+      personality: "friendly",
+      fur: "long",
+      size: "large",
+      care: "medium",
+      energy: "medium",
+      social: "high",
+      grooming: "weekly",
+      vocal: "moderate",
+      img: "https://petcorner.vn/wp-content/uploads/2025/05/Dac-diem-meo-Maine-Coon-800x531.jpeg",
+      desc: "Maine Coon là giống mèo lớn nhất thế giới, thân thiện và thông minh. Chúng có bộ lông dày chống nước và đuôi dài rậm. Maine Coon rất hòa đồng với trẻ em và các vật nuôi khác, được mệnh danh là 'người khổng lồ hiền lành'."
+    },
+    {
+      name: "Mèo Siamese",
+      personality: "active",
+      fur: "short",
+      size: "medium",
+      care: "low",
+      energy: "high",
+      social: "high",
+      grooming: "minimal",
+      vocal: "vocal",
+      img: "https://welovecatz.hu/media/images/2022_02_gettyimages-9_mxm6sYa.2e16d0ba.format-avif.fill-867x578.avif",
+      desc: "Mèo Siamese nổi tiếng với đôi mắt xanh và giọng kêu đặc trưng. Chúng rất thông minh, tò mò và thích giao tiếp với chủ. Siamese cần nhiều sự chú ý và tương tác, phù hợp với những người có thể dành thời gian chơi đùa cùng chúng."
+    },
+    {
+      name: "Mèo Scottish Fold",
+      personality: "calm",
+      fur: "short",
+      size: "medium",
+      care: "low",
+      energy: "low",
+      social: "medium",
+      grooming: "minimal",
+      vocal: "quiet",
+      img: "https://vuipet.com/wp-content/uploads/2021/07/meo-tai-cup-gia-768x442.jpg",
+      desc: "Scottish Fold có đặc điểm nổi bật là đôi tai gập xuống, tạo nên vẻ ngoài độc đáo và đáng yêu. Chúng có tính cách điềm tĩnh, thích được vuốt ve và rất phù hợp với cuộc sống trong nhà. Giống mèo này rất dễ thương và hòa đồng."
+    },
+    {
+      name: "Mèo Sphynx",
+      personality: "friendly",
+      fur: "short",
+      size: "medium",
+      care: "high",
+      energy: "medium",
+      social: "high",
+      grooming: "weekly",
+      vocal: "moderate",
+      img: "https://images.ctfassets.net/qj2yxv39d6ig/53i65lCwpH4FiMXEoZC5C9/5a02bf0bcd1c1e3bc0e784167d79a0eb/free-photo-of-portrait-of-sphynx-cat.jpeg?w=1510&h=1006&q=80&fm=webp",
+      desc: "Sphynx là giống mèo không lông nổi tiếng, có tính cách thân thiện và quấn chủ. Do không có lông, chúng cần được tắm thường xuyên và giữ ấm. Sphynx rất năng động, thích được chú ý và là người bạn đồng hành tuyệt vời cho những người dị ứng với lông mèo."
+    },
+    {
+      name: "Mèo Abyssinian",
+      personality: "active",
+      fur: "short",
+      size: "medium",
+      care: "low",
+      energy: "high",
+      social: "high",
+      grooming: "minimal",
+      vocal: "moderate",
+      img: "https://www.thesprucepets.com/thmb/UPYN6rumtZv5mW4wLprNAs0lbbE=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/GettyImages-165827729-efc11c02690f457a81ef6ccbfa8eb34d.jpg",
+      desc: "Abyssinian là giống mèo cổ xưa với vẻ ngoài thanh lịch và tính cách năng động. Chúng rất thông minh, tò mò và thích leo trèo. Abyssinian có bộ lông ngắn với màu sắc đặc trưng và rất thích tương tác với con người, phù hợp với những gia đình năng động."
+    },
+    {
+      name: "Mèo Russian Blue",
+      personality: "calm",
+      fur: "short",
+      size: "medium",
+      care: "low",
+      energy: "low",
+      social: "medium",
+      grooming: "minimal",
+      vocal: "quiet",
+      img: "https://vuipet.com/wp-content/uploads/2021/07/meo-nga-mat-xanh-5.jpg",
+      desc: "Russian Blue có bộ lông màu xám xanh đặc trưng và đôi mắt xanh lá cây rực rỡ. Chúng có tính cách điềm tĩnh, thông minh và hơi nhút nhát với người lạ nhưng rất quấn chủ. Russian Blue ít rụng lông và rất sạch sẽ, phù hợp với những người sống trong không gian nhỏ."
+    }
+  ];
+
+  const products = [
+    {
+      name: "Thức Ăn Hạt Cho Mèo",
+      price: "250.000đ",
+      img: "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=200",
+      desc: "Thức ăn hạt cao cấp đầy đủ dinh dưỡng"
+    },
+    {
+      name: "Cát Vệ Sinh",
+      price: "180.000đ",
+      img: "https://thuyred.com/thumb/550x600/1/upload/sanpham/z29804890618543b97d2c3cc87c2528ea4754d32af650c-7747.jpg",
+      desc: "Cát vệ sinh khử mùi, thân thiện môi trường"
+    },
+    {
+      name: "Khay Vệ Sinh",
+      price: "350.000đ",
+      img: "https://iupets.vn/wp-content/uploads/2020/02/khay-ve-sinh-cho-meo.jpg",
+      desc: "Khay vệ sinh kín đáo, dễ vệ sinh"
+    },
+    {
+      name: "Đồ Chơi Cho Mèo",
+      price: "120.000đ",
+      img: "https://image.made-in-china.com/318f0j00dEsYGPkWHHuy/Cat-Laser-Toy-mp4.webp",
+      desc: "Bộ đồ chơi đa dạng kích thích vận động"
+    },
+    {
+      name: "Lược Chải Lông",
+      price: "95.000đ",
+      img: "https://bizweb.dktcdn.net/100/305/551/products/h7f74eeffd9a64d6185a868d8abb8229fk-jpg-q50.jpg?v=1610448308030",
+      desc: "Lược chải lông chuyên dụng cho mèo"
+    },
+    {
+      name: "Nhà Mèo Cây Cào",
+      price: "1.200.000đ",
+      img: "https://cunstores.com/wp-content/uploads/2023/11/SKU-106-Mai-Doi-Xam-M-05.jpg",
+      desc: "Nhà mèo nhiều tầng với cây cào móng"
+    },
+    {
+      name: "Bát Ăn Uống",
+      price: "150.000đ",
+      img: "https://cutepetshop.vn/wp-content/uploads/2023/10/images-upload-woo2F7ee4786ac0e2cc34337bc16fa02a5043.jpg",
+      desc: "Bộ bát ăn uống không gỉ, dễ vệ sinh"
+    }
+  ];
+
+  function findMatch() {
+    const personality = document.getElementById('personality').value;
+    const fur = document.getElementById('fur').value;
+    const size = document.getElementById('size').value;
+    const care = document.getElementById('care').value;
+    const energy = document.getElementById('energy').value;
+    const social = document.getElementById('social').value;
+    const grooming = document.getElementById('grooming').value;
+    const vocal = document.getElementById('vocal').value;
+
+    // Tìm mèo phù hợp nhất dựa trên số tiêu chí khớp
+    let bestMatch = null;
+    let maxMatches = 0;
+
+    cats.forEach(cat => {
+      let matches = 0;
+      if (cat.personality === personality) matches++;
+      if (cat.fur === fur) matches++;
+      if (cat.size === size) matches++;
+      if (cat.care === care) matches++;
+      if (cat.energy === energy) matches++;
+      if (cat.social === social) matches++;
+      if (cat.grooming === grooming) matches++;
+      if (cat.vocal === vocal) matches++;
+
+      if (matches > maxMatches) {
+        maxMatches = matches;
+        bestMatch = cat;
+      }
+    });
+
+    const result = document.getElementById('result');
+    const img = document.getElementById('catImg');
+    const name = document.getElementById('catName');
+    const desc = document.getElementById('catDesc');
+
+    if (bestMatch && maxMatches >= 3) {
+      img.src = bestMatch.img;
+      img.alt = bestMatch.name;
+      img.style.display = 'block';
+      name.innerText = bestMatch.name;
+      desc.innerText = bestMatch.desc;
+      result.style.display = 'block';
+    } else {
+      img.src = "";
+      img.alt = "";
+      img.style.display = 'none';
+      name.innerText = "Không tìm thấy giống mèo phù hợp :(";
+      desc.innerText = "Hãy thử thay đổi tiêu chí tìm kiếm nhé!";
+      result.style.display = 'block';
+    }
+  }
+
+  function displayBreeds() {
+    const breedsGrid = document.getElementById('breedsGrid');
+    breedsGrid.innerHTML = '';
+    
+    cats.forEach(cat => {
+      const card = document.createElement('div');
+      card.className = 'breed-card';
+      card.innerHTML = `
+        <img src="${cat.img}" alt="${cat.name}" />
+        <h3>${cat.name}</h3>
+        <p>${cat.desc}</p>
+      `;
+      breedsGrid.appendChild(card);
+    });
+  }
+
+  function displayProducts() {
+    const productsList = document.getElementById('productsList');
+    productsList.innerHTML = '';
+    
+    products.forEach(product => {
+      const item = document.createElement('div');
+      item.className = 'product-item';
+      item.innerHTML = `
+        <img src="${product.img}" alt="${product.name}" />
+        <div class="product-info">
+          <h3>${product.name}</h3>
+          <p>${product.desc}</p>
+          <div class="product-price">${product.price}</div>
+        </div>
+      `;
+      productsList.appendChild(item);
+    });
+  }
+
+  // Ẩn phần kết quả lúc đầu nếu có refresh/trang mới và hiển thị các giống mèo
+  window.onload = function() {
+    document.getElementById('result').style.display = 'none';
+    displayBreeds();
+    displayProducts();
+  };
+</script>
+</body>
+</html>
+
